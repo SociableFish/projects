@@ -1,2 +1,2 @@
-# reference
-A place to store reference material. 
+# projects
+A place to store my various projects that I decide to release to the public. 
