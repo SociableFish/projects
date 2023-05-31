@@ -39,9 +39,10 @@ namespace utils{
         constexpr T pow(const T&, std::size_t);
     }
     template <class T>
-    inline constexpr T abs(const T& arg){return std::max(arg, -arg);}
-    template <std::unsigned_integral T>
-    inline constexpr T abs(const T& arg){return arg;}
+    constexpr T abs(const T& arg);
+    namespace literals{
+        using namespace std::literals;
+    }
 }
 template <class T>
 constexpr T utils::detail::pow(const T& lhs, std::ptrdiff_t rhs){
@@ -53,7 +54,8 @@ constexpr T utils::detail::pow(const T& lhs, std::size_t rhs){
     if (!rhs) return T(1);
     if (lhs == T()) return lhs;
     if (rhs == 1) return lhs;
-    T result = T(), to_multiply = lhs;
+    // https://en.wikipedia.org/wiki/Exponentiation_by_squaring
+    T result = T(1), to_multiply = lhs;
     while (true){
         if (rhs % 2) result *= to_multiply;
         rhs /= 2;
@@ -61,5 +63,10 @@ constexpr T utils::detail::pow(const T& lhs, std::size_t rhs){
         to_multiply *= to_multiply;
     }
     return result;
+}
+template <class T>
+constexpr T utils::abs(const T& arg){
+    if (arg < 0) return -arg;
+    return arg;
 }
 #endif
