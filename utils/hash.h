@@ -6,7 +6,7 @@ namespace utils{
         template <class T, template <class> class Map, class U>
         struct MapTupleTypesHelper{};
         template <class T, template <class> class Map, std::size_t... Ints>
-        struct MapTupleTypesHelper<T, Map, std::integer_sequence<std::size_t, Ints...>>: utils::detail::Wrapper<std::tuple<Map<std::tuple_element_t<Ints, T>>...>>{};
+        struct MapTupleTypesHelper<T, Map, std::integer_sequence<std::size_t, Ints...>>: std::type_identity<std::tuple<Map<std::tuple_element_t<Ints, T>>...>>{};
         template <class T, template <class> class Map>
         using MapTupleTypes = utils::detail::MapTupleTypesHelper<T, Map, std::make_index_sequence<std::tuple_size_v<T>>>::type;
     }

@@ -17,6 +17,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <optional>
 #include <queue>
 #include <set>
 #include <stack>
@@ -28,11 +29,10 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <variant>
 #include <vector>
 namespace utils{
     namespace detail{
-        template <class T>
-        struct Wrapper{using type = T;};
         template <class T>
         constexpr T pow(const T&, std::ptrdiff_t);
         template <class T>
