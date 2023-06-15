@@ -291,7 +291,7 @@ class utils::Integer final{
         constexpr operator T() const noexcept{return T(to_long_double());}
         
         template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
-        constexpr std::basic_string<CharT, Traits, Alloc> to_string(std::uint8_t base = 10) const{return to_string_custom_alloc<CharT, Traits, Alloc>(Alloc(), base);}
+        constexpr std::basic_string<CharT, Traits, Alloc> to_string(std::uint8_t base = 10) const{return this->to_string_custom_alloc<CharT, Traits, Alloc>(Alloc(), base);}
         
         template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
         constexpr std::basic_string<CharT, Traits, Alloc> to_string_custom_alloc(const Alloc&, std::uint8_t = 10) const;
@@ -625,6 +625,7 @@ constexpr utils::Integer utils::Integer::bitwise(const utils::Integer& lhs, cons
 
 template <class CharT, class Traits, class Alloc>
 constexpr std::basic_string<CharT, Traits, Alloc> utils::Integer::to_string_custom_alloc(const Alloc& alloc, std::uint8_t base) const{
+    if ((base < 2) || (base > 36)) throw std::invalid_argument("Invalid base");
     std::basic_string<CharT, Traits, Alloc> result(alloc);
     if (!*this){
         result += CharT('0');
@@ -710,8 +711,6 @@ namespace utils::literals{
 }
 
 constexpr std::size_t std::hash<utils::Integer>::operator()(const utils::Integer& val) const noexcept{
-    if (val == std::intmax_t(val)) return std::hash<std::intmax_t>()(val);
-    if (val == std::uintmax_t(val)) return std::hash<std::uintmax_t>()(val);
     utils::HashCombiner combiner(std::invoke_r<std::size_t>(std::hash<bool>(), val.is_negative));
     combiner.write(std::invoke_r<std::size_t>(std::hash<std::size_t>(), val.digits.size()));
     for (std::uint32_t i: val.digits) combiner.write(std::invoke_r<std::size_t>(std::hash<std::uint32_t>(), i));

@@ -40,13 +40,19 @@ namespace utils{
     inline constexpr bool operator==(const utils::Fraction&, const T&);
     template <std::convertible_to<utils::Fraction> T>
     inline constexpr bool operator==(const T&,               const utils::Fraction&);
+    template <std::floating_point T>
+    requires std::convertible_to<T, utils::Fraction>
+    constexpr bool        operator==(const utils::Fraction&, const T&);
+    template <std::floating_point T>
+    requires std::convertible_to<T, utils::Fraction>
+    constexpr bool        operator==(const T&,               const utils::Fraction&);
 
-    inline constexpr std::strong_ordering  operator<=>(const utils::Fraction&, const utils::Fraction&) noexcept;
+    inline constexpr std::strong_ordering  operator<=>(const utils::Fraction&, const utils::Fraction&);
     template <std::convertible_to<utils::Fraction> T>
     inline constexpr std::strong_ordering  operator<=>(const utils::Fraction&, const T&);
     template <std::floating_point T>
     requires std::convertible_to<T, utils::Fraction>
-    inline constexpr std::partial_ordering operator<=>(const utils::Fraction&, const T&);
+    constexpr std::partial_ordering        operator<=>(const utils::Fraction&, const T&);
 
     inline constexpr utils::Integer trunc(const utils::Fraction&);
 
@@ -97,9 +103,9 @@ class utils::Fraction{
         constexpr Fraction& operator=(Fraction&&) noexcept = default;
 
         constexpr const utils::Integer& numerator() const noexcept{return numerator_var;}
-        constexpr const utils::Integer& denominator() const noexcept{return denominator_var_0_eq_1 ? denominator_var_0_eq_1 : utils::detail::one;}
+        constexpr const utils::Integer& denominator() const noexcept{return bool(denominator_var_0_eq_1) ? denominator_var_0_eq_1 : utils::detail::one;}
 
-        constexpr Fraction& operator+=(const Fraction& rhs){return *this = Fraction(numerator() * rhs.denominator() + denominator() * rhs.numerator(), denominator() * rhs.numerator());}
+        constexpr Fraction& operator+=(const Fraction& rhs){return *this = Fraction(numerator() * rhs.denominator() + denominator() * rhs.numerator(), denominator() * rhs.denominator());}
         template <std::convertible_to<Fraction> T>
         constexpr Fraction& operator+=(const T& rhs){return *this += Fraction(rhs);}
 
@@ -109,7 +115,7 @@ class utils::Fraction{
         friend inline constexpr Fraction operator+(const T& lhs, const Fraction& rhs){return Fraction(lhs) + rhs;}
         friend inline constexpr Fraction operator+(const Fraction& val){return val;}
 
-        constexpr Fraction& operator-=(const Fraction& rhs){return *this = Fraction(numerator() * rhs.denominator() - denominator() * rhs.numerator(), denominator() * rhs.numerator());}
+        constexpr Fraction& operator-=(const Fraction& rhs){return *this = Fraction(numerator() * rhs.denominator() - denominator() * rhs.numerator(), denominator() * rhs.denominator());}
         template <std::convertible_to<Fraction> T>
         constexpr Fraction& operator-=(const T& rhs){return *this -= Fraction(rhs);}
 
@@ -149,7 +155,7 @@ class utils::Fraction{
         template <std::convertible_to<Fraction> T>
         friend inline constexpr bool operator==(const T& lhs, const Fraction& rhs){return Fraction(lhs) == rhs;}
 
-        friend inline constexpr std::strong_ordering operator<=>(const Fraction&, const Fraction&) noexcept;
+        friend inline constexpr std::strong_ordering operator<=>(const Fraction&, const Fraction&);
         template <std::convertible_to<Fraction> T>
         friend inline constexpr std::strong_ordering operator<=>(const Fraction& lhs, const T& rhs){return lhs <=> Fraction(rhs);}
 
@@ -160,24 +166,21 @@ class utils::Fraction{
         template <std::floating_point T>
         constexpr operator T() const;
 
-        enum{decimals};
         enum{fraction_form};
         
         template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
-        constexpr std::basic_string<CharT, Traits, Alloc> to_string(std::size_t sig_figs = 50) const{return to_string_custom_alloc<CharT, Traits, Alloc>(Alloc(), sig_figs);}
+        constexpr std::basic_string<CharT, Traits, Alloc> to_string(std::size_t sig_figs = 50) const{return this->to_string_custom_alloc<CharT, Traits, Alloc>(Alloc(), sig_figs);}
         template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
-        constexpr std::basic_string<CharT, Traits, Alloc> to_string(decltype(decimals), std::size_t precision = 50) const;
+        constexpr std::basic_string<CharT, Traits, Alloc> to_string(decltype(utils::decimals), std::size_t precision = 50) const;
         template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
-        constexpr std::basic_string<CharT, Traits, Alloc> to_string(decltype(fraction_form)) const{return to_string_custom_alloc<CharT, Traits, Alloc>(Alloc(), fraction_form);}
+        constexpr std::basic_string<CharT, Traits, Alloc> to_string(decltype(fraction_form)) const{return this->to_string_custom_alloc<CharT, Traits, Alloc>(Alloc(), fraction_form);}
 
         template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
         constexpr std::basic_string<CharT, Traits, Alloc> to_string_custom_alloc(const Alloc&, std::size_t = 50) const;
         template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
-        constexpr std::basic_string<CharT, Traits, Alloc> to_string_custom_alloc(const Alloc&, decltype(decimals), std::size_t = 50) const;
+        constexpr std::basic_string<CharT, Traits, Alloc> to_string_custom_alloc(const Alloc&, decltype(utils::decimals), std::size_t = 50) const;
         template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
         constexpr std::basic_string<CharT, Traits, Alloc> to_string_custom_alloc(const Alloc&, decltype(fraction_form)) const;
-
-        friend struct std::hash<Fraction>;
 
         friend inline constexpr utils::Integer trunc(const Fraction& val){return val.numerator() / val.denominator();}
         
@@ -291,7 +294,8 @@ constexpr void utils::Fraction::from_str(std::string_view sv){
         decimal_part = decimal_part.substr(0, decimal_part.find_first_of("eE"));
         set_check_exponent_part();
     }
-    utils::Integer numerator = utils::Integer(integer_part) * utils::pow(10_i, decimal_part.size()) + utils::Integer(decimal_part), denominator = utils::pow(10_i, decimal_part.size());
+    utils::Integer numerator = utils::Integer(integer_part, 10) * utils::pow(10_i, decimal_part.size()) + utils::Integer(decimal_part, 10);
+    utils::Integer denominator = utils::pow(10_i, decimal_part.size());
     std::from_chars_result res = std::from_chars(exponent_part.begin(), exponent_part.end(), exponent);
     if (res.ptr != exponent_part.end()) throw utils::detail::invalid_char_error;
     if (res.ec != std::errc()) throw utils::detail::invalid_char_error;
@@ -301,9 +305,23 @@ constexpr void utils::Fraction::from_str(std::string_view sv){
     *this = utils::Fraction(numerator, denominator);
 }
 
+template <std::floating_point T>
+constexpr utils::Fraction::operator T() const{
+    std::string string_version = to_string(std::numeric_limits<T>::digits10() + 1);
+    T result = 0;
+    std::from_chars_result res = std::from_chars(string_version.data(), string_version.data() + string_version.size(), result);
+    if (res.ptr != (string_version.data() + string_version.size())) throw std::invalid_argument("Invalid argument");
+    if (res.ec == std::errc::result_out_of_range){
+        if (numerator() > 0) return std::numeric_limits<T>::infinity();
+        return -std::numeric_limits<T>::infinity();
+    }
+    if (res.ec != std::errc()) throw std::invalid_argument("Invalid argument");
+    return result;
+}
+
 template <class CharT, class Traits, class Alloc>
-inline constexpr std::basic_string<CharT, Traits, Alloc> utils::Fraction::to_string(decltype(utils::Fraction::decimals), std::size_t precision) const{
-    return to_string_custom_alloc<CharT, Traits, Alloc>(Alloc(), decimals, precision);
+inline constexpr std::basic_string<CharT, Traits, Alloc> utils::Fraction::to_string(decltype(utils::decimals), std::size_t precision) const{
+    return this->to_string_custom_alloc<CharT, Traits, Alloc>(Alloc(), utils::decimals, precision);
 }
 
 template <class CharT, class Traits, class Alloc>
@@ -313,15 +331,15 @@ inline constexpr std::basic_string<CharT, Traits, Alloc> utils::Fraction::to_str
     else if ((utils::abs(numerator()) == 1) && (utils::pow(10, utils::floor_log(denominator(), 10)) == denominator())) precision += utils::floor_log(denominator(), 10);
     else precision += (utils::floor_log(utils::Integer(1 / utils::abs(*this)), 10) + 1);
     if ((precision <= std::ptrdiff_t(sig_figs)) && (precision >= -std::ptrdiff_t(sig_figs)))
-        return to_string_custom_alloc<CharT, Traits, Alloc>(alloc, decimals, std::size_t(precision + sig_figs));
-    std::basic_string<CharT, Traits, Alloc> result = (*this * utils::pow(10, precision)).to_string_custom_alloc<CharT, Traits, Alloc>(alloc, decimals, std::size_t(sig_figs));
+        return this->to_string_custom_alloc<CharT, Traits, Alloc>(alloc, utils::decimals, std::size_t(precision + sig_figs));
+    std::basic_string<CharT, Traits, Alloc> result = (*this * utils::pow(10, precision)).to_string_custom_alloc<CharT, Traits, Alloc>(alloc, utils::decimals, std::size_t(sig_figs));
     std::string char_exp_str = std::format("{}", -precision);
     result += CharT('e');
     for (char i: char_exp_str) result += CharT(i);
     return result;
 }
 template <class CharT, class Traits, class Alloc>
-inline constexpr std::basic_string<CharT, Traits, Alloc> utils::Fraction::to_string_custom_alloc(const Alloc& alloc, decltype(utils::Fraction::decimals), std::size_t precision) const{
+inline constexpr std::basic_string<CharT, Traits, Alloc> utils::Fraction::to_string_custom_alloc(const Alloc& alloc, decltype(utils::decimals), std::size_t precision) const{
     if (!precision || (!(numerator() % denominator()))) return utils::round(*this).to_string_custom_alloc<CharT, Traits, Alloc>(alloc);
     std::basic_string<CharT, Traits, Alloc> result = utils::round(utils::abs(*this) * utils::pow(10, precision)).to_string_custom_alloc<CharT, Traits, Alloc>(alloc);
     if (result.size() < (precision + 1)) result.insert(result.cbegin(), precision + 1 - result.size(), CharT('0'));
@@ -355,8 +373,28 @@ inline constexpr utils::Fraction utils::operator/(const utils::Fraction& lhs, co
     return utils::Fraction(lhs.numerator() * rhs.denominator(), lhs.denominator() * rhs.numerator());
 }
 
-inline constexpr std::strong_ordering utils::operator<=>(const Fraction& lhs, const Fraction& rhs) noexcept{
+template <std::floating_point T>
+requires std::convertible_to<T, utils::Fraction>
+constexpr bool utils::operator==(const utils::Fraction& lhs, const T& rhs){
+    if (std::isinf((long double)rhs) || std::isnan((long double)rhs)) return false;
+    return lhs == utils::Fraction(rhs);
+}
+template <std::floating_point T>
+requires std::convertible_to<T, utils::Fraction>
+constexpr bool utils::operator==(const T& lhs, const utils::Fraction& rhs){
+    if (std::isinf((long double)rhs) || std::isnan((long double)rhs)) return false;
+    return utils::Fraction(lhs) == rhs;
+}
+
+inline constexpr std::strong_ordering utils::operator<=>(const Fraction& lhs, const Fraction& rhs){
     return lhs.numerator() * rhs.denominator() <=> lhs.denominator() * rhs.numerator();
+}
+template <std::floating_point T>
+requires std::convertible_to<T, utils::Fraction>
+constexpr std::partial_ordering utils::operator<=>(const Fraction& lhs, const T& rhs){
+    if (std::isinf((long double)rhs)) return 0 <=> rhs;
+    if (std::isnan((long double)rhs)) return std::partial_ordering::unordered;
+    return std::partial_ordering(lhs <=> utils::Fraction(rhs));
 }
 
 namespace utils::literals{
@@ -386,5 +424,10 @@ constexpr utils::Integer utils::round(const utils::Fraction& val){
     if (which_case == std::strong_ordering::less) return utils::floor(val);
     else if (which_case == std::strong_ordering::equal) return utils::trunc(val); // To match the behavior of round for floating-point types in c++
     else return utils::ceil(val);
+}
+
+constexpr std::size_t std::hash<utils::Fraction>::operator()(const utils::Fraction& val) const noexcept{
+    utils::HashCombiner combiner;
+    return combiner.write(std::hash<utils::Integer>()(val.numerator())).write(std::hash<utils::Integer>()(val.denominator())).finalize();
 }
 #endif
