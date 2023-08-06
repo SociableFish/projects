@@ -42,6 +42,11 @@ namespace utils{
             val.template to_string<CharT, Traits, Alloc>(std::forward<Args>(args)...);
         };
     }
+
+    namespace literals{
+        using namespace std::literals;
+    }
+
     template <class T>
     constexpr T abs(const T& arg);
 
@@ -63,19 +68,6 @@ namespace utils{
     constexpr std::basic_string<CharT, Traits, Alloc> to_string_custom_alloc(const T&, const Alloc&, std::size_t);
     template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>, std::floating_point T>
     constexpr std::basic_string<CharT, Traits, Alloc> to_string_custom_alloc(const T&, const Alloc&, decltype(decimals), std::size_t);
-
-    template <class InputIt>
-    inline constexpr void sort(InputIt first, InputIt last){utils::sort(first, last, std::less<typename std::iterator_traits<InputIt>::value_type>());}
-    template <class InputIt, class Compare>
-    constexpr void sort(InputIt, InputIt, Compare);
-    
-    template <std::random_access_iterator InputIt>
-    inline constexpr void sort(InputIt first, InputIt last){std::stable_sort(first, last);}
-    template <std::random_access_iterator InputIt, class Compare>
-    inline constexpr void sort(InputIt first, InputIt last, Compare cmp){std::stable_sort(first, last, cmp);}
-    namespace literals{
-        using namespace std::literals;
-    }
 }
 
 template <class T>
