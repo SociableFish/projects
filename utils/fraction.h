@@ -6,53 +6,39 @@ namespace utils{
 
     namespace detail{
         const std::string fraction_chrs = "0123456789+-.'/eE";
-        const utils::Integer one = 1; // exists so that utils::Fraction::denominator can return const utils::Integer&
+        const utils::Integer one = 1; // exists so that utils::Fraction::denominator can always return const utils::Integer&
+        
+        template <class T>
+        concept FloatFractionComparable = std::floating_point<T> && std::convertible_to<T, utils::Fraction>;
     }
 
     inline constexpr utils::Fraction operator+(const utils::Fraction&, const utils::Fraction&);
-    template <std::convertible_to<utils::Fraction> T>
-    inline constexpr utils::Fraction operator+(const utils::Fraction&, const T&);
-    template <std::convertible_to<utils::Fraction> T>
-    inline constexpr utils::Fraction operator+(const T&,               const utils::Fraction&);
+    inline constexpr utils::Fraction operator+(const utils::Fraction&, const std::convertible_to<utils::Fraction> auto&);
+    inline constexpr utils::Fraction operator+(const std::convertible_to<utils::Fraction> auto&, const utils::Fraction&);
     inline constexpr utils::Fraction operator+(const utils::Fraction&);
 
     inline constexpr utils::Fraction operator-(const utils::Fraction&, const utils::Fraction&);
-    template <std::convertible_to<utils::Fraction> T>
-    inline constexpr utils::Fraction operator-(const utils::Fraction&, const T&);
-    template <std::convertible_to<utils::Fraction> T>
-    inline constexpr utils::Fraction operator-(const T&,               const utils::Fraction&);
+    inline constexpr utils::Fraction operator-(const utils::Fraction&, const std::convertible_to<utils::Fraction> auto&);
+    inline constexpr utils::Fraction operator-(const std::convertible_to<utils::Fraction> auto&, const utils::Fraction&);
     inline constexpr utils::Fraction operator-(const utils::Fraction&);
 
     inline constexpr utils::Fraction operator*(const utils::Fraction&, const utils::Fraction&);
-    template <std::convertible_to<utils::Fraction> T>
-    inline constexpr utils::Fraction operator*(const utils::Fraction&, const T&);
-    template <std::convertible_to<utils::Fraction> T>
-    inline constexpr utils::Fraction operator*(const T&,               const utils::Fraction&);
+    inline constexpr utils::Fraction operator*(const utils::Fraction&, const std::convertible_to<utils::Fraction> auto&);
+    inline constexpr utils::Fraction operator*(const std::convertible_to<utils::Fraction> auto&, const utils::Fraction&);
 
     inline constexpr utils::Fraction operator/(const utils::Fraction&, const utils::Fraction&);
-    template <std::convertible_to<utils::Fraction> T>
-    inline constexpr utils::Fraction operator/(const utils::Fraction&, const T&);
-    template <std::convertible_to<utils::Fraction> T>
-    inline constexpr utils::Fraction operator/(const T&,               const utils::Fraction&);
+    inline constexpr utils::Fraction operator/(const utils::Fraction&, const std::convertible_to<utils::Fraction> auto&);
+    inline constexpr utils::Fraction operator/(const std::convertible_to<utils::Fraction> auto&, const utils::Fraction&);
 
     inline constexpr bool operator==(const utils::Fraction&, const utils::Fraction&) noexcept;
-    template <std::convertible_to<utils::Fraction> T>
-    inline constexpr bool operator==(const utils::Fraction&, const T&);
-    template <std::convertible_to<utils::Fraction> T>
-    inline constexpr bool operator==(const T&,               const utils::Fraction&);
-    template <std::floating_point T>
-    requires std::convertible_to<T, utils::Fraction>
-    constexpr bool        operator==(const utils::Fraction&, const T&);
-    template <std::floating_point T>
-    requires std::convertible_to<T, utils::Fraction>
-    constexpr bool        operator==(const T&,               const utils::Fraction&);
+    inline constexpr bool operator==(const utils::Fraction&, const std::convertible_to<utils::Fraction> auto&);
+    inline constexpr bool operator==(const std::convertible_to<utils::Fraction> auto&, const utils::Fraction&);
+    constexpr bool        operator==(const utils::Fraction&, utils::detail::FloatFractionComparable auto);
+    constexpr bool        operator==(utils::detail::FloatFractionComparable auto, const utils::Fraction&);
 
     inline constexpr std::strong_ordering  operator<=>(const utils::Fraction&, const utils::Fraction&);
-    template <std::convertible_to<utils::Fraction> T>
-    inline constexpr std::strong_ordering  operator<=>(const utils::Fraction&, const T&);
-    template <std::floating_point T>
-    requires std::convertible_to<T, utils::Fraction>
-    constexpr std::partial_ordering        operator<=>(const utils::Fraction&, const T&);
+    inline constexpr std::strong_ordering  operator<=>(const utils::Fraction&, const std::convertible_to<utils::Fraction> auto&);
+    constexpr std::partial_ordering        operator<=>(const utils::Fraction&, utils::detail::FloatFractionComparable auto);
 
     inline constexpr utils::Integer trunc(const utils::Fraction&);
 
@@ -62,7 +48,7 @@ namespace utils{
 
     constexpr utils::Integer round(const utils::Fraction&);
 
-    inline constexpr utils::Fraction pow(const utils::Fraction&, std::ptrdiff_t);
+    inline constexpr utils::Fraction pow(const utils::Fraction&, std::integral auto);
 }
 
 template <std::convertible_to<utils::Fraction> T>
@@ -93,11 +79,11 @@ class utils::Fraction{
 
         template <class CharT, class Traits = std::char_traits<CharT>>
         constexpr explicit Fraction(const CharT* cstr): Fraction(std::basic_string_view<CharT, Traits>(cstr)){}
-        template <class CharT, class Traits, class Alloc>
-        constexpr explicit Fraction(const std::basic_string<CharT, Traits, Alloc>& str): Fraction(std::basic_string_view<CharT, Traits>(str.data(), str.size())){}
-        template <class CharT, class Traits>
-        constexpr explicit Fraction(std::basic_string_view<CharT, Traits>);
         constexpr explicit Fraction(std::nullptr_t) = delete;
+        template <utils::String S>
+        constexpr explicit Fraction(const S& str): Fraction(std::basic_string_view<typename S::value_type, typename S::traits_type>(str)){}
+        template <utils::StringView SV>
+        constexpr explicit Fraction(SV);
 
         constexpr Fraction& operator=(const Fraction&) = default;
         constexpr Fraction& operator=(Fraction&&) noexcept = default;
@@ -106,42 +92,16 @@ class utils::Fraction{
         constexpr const utils::Integer& denominator() const noexcept{return bool(denominator_var_0_eq_1) ? denominator_var_0_eq_1 : utils::detail::one;}
 
         constexpr Fraction& operator+=(const Fraction& rhs){return *this = Fraction(numerator() * rhs.denominator() + denominator() * rhs.numerator(), denominator() * rhs.denominator());}
-        template <std::convertible_to<Fraction> T>
-        constexpr Fraction& operator+=(const T& rhs){return *this += Fraction(rhs);}
-
-        template <std::convertible_to<Fraction> T>
-        friend inline constexpr Fraction operator+(const Fraction& lhs, const T& rhs){return lhs + Fraction(rhs);}
-        template <std::convertible_to<Fraction> T>
-        friend inline constexpr Fraction operator+(const T& lhs, const Fraction& rhs){return Fraction(lhs) + rhs;}
-        friend inline constexpr Fraction operator+(const Fraction& val){return val;}
+        constexpr Fraction& operator+=(const std::convertible_to<Fraction> auto& rhs){return *this += Fraction(rhs);}
 
         constexpr Fraction& operator-=(const Fraction& rhs){return *this = Fraction(numerator() * rhs.denominator() - denominator() * rhs.numerator(), denominator() * rhs.denominator());}
-        template <std::convertible_to<Fraction> T>
-        constexpr Fraction& operator-=(const T& rhs){return *this -= Fraction(rhs);}
-
-        template <std::convertible_to<Fraction> T>
-        friend inline constexpr Fraction operator-(const Fraction& lhs, const T& rhs){return lhs + (-Fraction(rhs));}
-        template <std::convertible_to<Fraction> T>
-        friend inline constexpr Fraction operator-(const T& lhs, const Fraction& rhs){return Fraction(lhs) + (-rhs);}
-        friend inline constexpr Fraction operator-(const Fraction& val){return Fraction(-val.numerator(), val.denominator());}
+        constexpr Fraction& operator-=(const std::convertible_to<Fraction> auto& rhs){return *this -= Fraction(rhs);}
 
         constexpr Fraction& operator*=(const Fraction& rhs){return *this = Fraction(numerator() * rhs.numerator(), denominator() * rhs.denominator());}
-        template <std::convertible_to<Fraction> T>
-        constexpr Fraction& operator*=(const T& rhs){return *this *= Fraction(rhs);}
-
-        template <std::convertible_to<Fraction> T>
-        friend inline constexpr Fraction operator*(const Fraction& lhs, const T& rhs){return lhs * Fraction(rhs);}
-        template <std::convertible_to<Fraction> T>
-        friend inline constexpr Fraction operator*(const T& lhs, const Fraction& rhs){return Fraction(lhs) * rhs;}
+        constexpr Fraction& operator*=(const std::convertible_to<Fraction> auto& rhs){return *this *= Fraction(rhs);}
 
         constexpr Fraction& operator/=(const Fraction& rhs){return *this = Fraction(numerator() * rhs.denominator(), denominator() * rhs.numerator());}
-        template <std::convertible_to<Fraction> T>
-        constexpr Fraction& operator/=(const T& rhs){return *this /= Fraction(rhs);}
-
-        template <std::convertible_to<Fraction> T>
-        friend inline constexpr Fraction operator/(const Fraction& lhs, const T& rhs){return lhs / Fraction(rhs);}
-        template <std::convertible_to<Fraction> T>
-        friend inline constexpr Fraction operator/(const T& lhs, const Fraction& rhs){return Fraction(lhs) / rhs;}
+        constexpr Fraction& operator/=(const std::convertible_to<Fraction> auto& rhs){return *this /= Fraction(rhs);}
 
         constexpr Fraction& operator++(){return *this += 1;}
         constexpr Fraction operator++(int);
@@ -149,42 +109,53 @@ class utils::Fraction{
         constexpr Fraction& operator--(){return *this -= 1;}
         constexpr Fraction operator--(int);
 
+        friend inline constexpr Fraction operator+(const Fraction& lhs, const std::convertible_to<Fraction> auto& rhs){return lhs + Fraction(rhs);}
+        friend inline constexpr Fraction operator+(const std::convertible_to<Fraction> auto& lhs, const Fraction& rhs){return Fraction(lhs) + rhs;}
+        friend inline constexpr Fraction operator+(const Fraction& val){return val;}
+
+        friend inline constexpr Fraction operator-(const Fraction& lhs, const std::convertible_to<Fraction> auto& rhs){return lhs + (-Fraction(rhs));}
+        friend inline constexpr Fraction operator-(const std::convertible_to<Fraction> auto& lhs, const Fraction& rhs){return Fraction(lhs) + (-rhs);}
+        friend inline constexpr Fraction operator-(const Fraction& val){return Fraction(-val.numerator(), val.denominator());}
+
+        friend inline constexpr Fraction operator*(const Fraction& lhs, const std::convertible_to<Fraction> auto& rhs){return lhs * Fraction(rhs);}
+        friend inline constexpr Fraction operator*(const std::convertible_to<Fraction> auto& lhs, const Fraction& rhs){return Fraction(lhs) * rhs;}
+
+        friend inline constexpr Fraction operator/(const Fraction& lhs, const std::convertible_to<Fraction> auto& rhs){return lhs / Fraction(rhs);}
+        friend inline constexpr Fraction operator/(const std::convertible_to<Fraction> auto& lhs, const Fraction& rhs){return Fraction(lhs) / rhs;}
+
         friend inline constexpr bool operator==(const Fraction&, const Fraction&) noexcept = default;
-        template <std::convertible_to<Fraction> T>
-        friend inline constexpr bool operator==(const Fraction& lhs, const T& rhs){return lhs == Fraction(rhs);}
-        template <std::convertible_to<Fraction> T>
-        friend inline constexpr bool operator==(const T& lhs, const Fraction& rhs){return Fraction(lhs) == rhs;}
+        friend inline constexpr bool operator==(const Fraction& lhs, const std::convertible_to<Fraction> auto& rhs){return lhs == Fraction(rhs);}
+        friend inline constexpr bool operator==(const std::convertible_to<Fraction> auto& lhs, const Fraction& rhs){return Fraction(lhs) == rhs;}
 
         friend inline constexpr std::strong_ordering operator<=>(const Fraction&, const Fraction&);
-        template <std::convertible_to<Fraction> T>
-        friend inline constexpr std::strong_ordering operator<=>(const Fraction& lhs, const T& rhs){return lhs <=> Fraction(rhs);}
+        friend inline constexpr std::strong_ordering operator<=>(const Fraction& lhs, const std::convertible_to<Fraction> auto& rhs){return lhs <=> Fraction(rhs);}
 
-        constexpr operator bool() const noexcept{return numerator();}
+        explicit constexpr operator bool() const noexcept{return bool(numerator());}
         template <std::integral T>
-        constexpr operator T() const{return numerator() / denominator();}
-        constexpr operator utils::Integer() const{return numerator() / denominator();}
+        explicit constexpr operator T() const{return numerator() / denominator();}
+        explicit constexpr operator utils::Integer() const{return numerator() / denominator();}
         template <std::floating_point T>
-        constexpr operator T() const;
+        explicit constexpr operator T() const;
 
         enum{fraction_form};
         
-        template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
-        constexpr std::basic_string<CharT, Traits, Alloc> to_string(std::size_t sig_figs = 50) const{return this->to_string_custom_alloc<CharT, Traits, Alloc>(Alloc(), sig_figs);}
-        template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
-        constexpr std::basic_string<CharT, Traits, Alloc> to_string(decltype(utils::decimals), std::size_t precision = 50) const;
-        template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
-        constexpr std::basic_string<CharT, Traits, Alloc> to_string(decltype(fraction_form)) const{return this->to_string_custom_alloc<CharT, Traits, Alloc>(Alloc(), fraction_form);}
+        template <utils::String S>
+        constexpr S to_string(std::size_t sig_figs = 50) const{return this->to_string_custom_alloc<S>(typename S::allocator_type(), sig_figs);}
+        template <utils::String S>
+        constexpr S to_string(decltype(utils::decimals), std::size_t precision = 50) const;
+        template <utils::String S>
+        constexpr S to_string(decltype(fraction_form)) const{return this->to_string_custom_alloc<S>(typename S::allocator_type(), fraction_form);}
 
-        template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
-        constexpr std::basic_string<CharT, Traits, Alloc> to_string_custom_alloc(const Alloc&, std::size_t = 50) const;
-        template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
-        constexpr std::basic_string<CharT, Traits, Alloc> to_string_custom_alloc(const Alloc&, decltype(utils::decimals), std::size_t = 50) const;
-        template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
-        constexpr std::basic_string<CharT, Traits, Alloc> to_string_custom_alloc(const Alloc&, decltype(fraction_form)) const;
+        template <utils::String S>
+        constexpr S to_string_custom_alloc(const typename S::allocator_type&, std::size_t = 50) const;
+        template <utils::String S>
+        constexpr S to_string_custom_alloc(const typename S::allocator_type&, decltype(utils::decimals), std::size_t = 50) const;
+        template <utils::String S>
+        constexpr S to_string_custom_alloc(const typename S::allocator_type&, decltype(fraction_form)) const;
 
         friend inline constexpr utils::Integer trunc(const Fraction& val){return val.numerator() / val.denominator();}
         
-        friend inline constexpr Fraction pow(const Fraction& lhs, std::ptrdiff_t rhs){return utils::detail::pow<Fraction>(lhs, rhs);}
+        friend inline constexpr Fraction pow(const Fraction& lhs, std::integral auto rhs){return utils::detail::pow<Fraction>(lhs, rhs);}
     private:
         utils::Integer numerator_var = 0;
         utils::Integer denominator_var_0_eq_1 = 0; // 0 "==" 1 because no one likes throwing move constructors or throwing move assignment operators
@@ -215,17 +186,17 @@ constexpr utils::Fraction::Fraction(const utils::Integer& numerator, const utils
     denominator_var_0_eq_1 /= gcd;
     if (denominator_var_0_eq_1 == utils::detail::one) denominator_var_0_eq_1 = 0;
 }
-template <class CharT, class Traits>
-constexpr utils::Fraction::Fraction(std::basic_string_view<CharT, Traits> sv){
+template <utils::StringView SV>
+constexpr utils::Fraction::Fraction(SV sv){
     std::string char_string;
-    for (const CharT& i: sv){
+    for (const typename SV::value_type& i: sv){
         char to_add = char(i);
-        if (!Traits::eq(i, CharT(to_add))) throw utils::detail::invalid_char_error;
+        if (!SV::traits_type::eq(i, typename SV::value_type(to_add))) throw utils::detail::invalid_char_error;
         if (!utils::detail::fraction_chrs.contains(to_add)) throw utils::detail::invalid_char_error;
         if (to_add == '\'') continue;
         char_string += to_add;
     }
-    from_str(std::string_view(char_string.data(), char_string.size()));
+    from_str(std::string_view(char_string));
 }
 
 constexpr void utils::Fraction::from_num(long double num){
@@ -238,7 +209,7 @@ constexpr void utils::Fraction::from_num(long double num){
         to_convert += '-';
         num *= -1;
     }
-    (to_convert += utils::Integer(num).to_string<char>()) += '.'; // constexpr
+    (to_convert += utils::Integer(num).to_string<std::string>()) += '.'; // constexpr
     num -= std::truncl(num);
     while (num){
         int digit = num * 10;
@@ -319,41 +290,43 @@ constexpr utils::Fraction::operator T() const{
     return result;
 }
 
-template <class CharT, class Traits, class Alloc>
-inline constexpr std::basic_string<CharT, Traits, Alloc> utils::Fraction::to_string(decltype(utils::decimals), std::size_t precision) const{
-    return this->to_string_custom_alloc<CharT, Traits, Alloc>(Alloc(), utils::decimals, precision);
+template <utils::String S>
+inline constexpr S utils::Fraction::to_string(decltype(utils::decimals), std::size_t precision) const{
+    return this->to_string_custom_alloc<S>(typename S::allocator_type(), utils::decimals, precision);
 }
 
-template <class CharT, class Traits, class Alloc>
-inline constexpr std::basic_string<CharT, Traits, Alloc> utils::Fraction::to_string_custom_alloc(const Alloc& alloc, std::size_t sig_figs) const{
+template <utils::String S>
+inline constexpr S utils::Fraction::to_string_custom_alloc(const S::allocator_type& alloc, std::size_t sig_figs) const{
+    using namespace utils::literals;
     std::ptrdiff_t precision = 0;
     if (utils::abs(*this) >= 1) precision -= utils::floor_log(utils::Integer(*this), 10);
-    else if ((utils::abs(numerator()) == 1) && (utils::pow(10, utils::floor_log(denominator(), 10)) == denominator())) precision += utils::floor_log(denominator(), 10);
+    else if ((utils::abs(numerator()) == 1) && (utils::pow(10_i, utils::floor_log(denominator(), 10)) == denominator())) precision += utils::floor_log(denominator(), 10);
     else precision += (utils::floor_log(utils::Integer(1 / utils::abs(*this)), 10) + 1);
     if ((precision <= std::ptrdiff_t(sig_figs)) && (precision >= -std::ptrdiff_t(sig_figs)))
-        return this->to_string_custom_alloc<CharT, Traits, Alloc>(alloc, utils::decimals, std::size_t(precision + sig_figs));
-    std::basic_string<CharT, Traits, Alloc> result = (*this * utils::pow(10, precision)).to_string_custom_alloc<CharT, Traits, Alloc>(alloc, utils::decimals, std::size_t(sig_figs));
+        return this->to_string_custom_alloc<S>(alloc, utils::decimals, std::size_t(precision + sig_figs));
+    S result = (*this * utils::pow(10, precision)).to_string_custom_alloc<S>(alloc, utils::decimals, std::size_t(sig_figs));
     std::string char_exp_str = std::format("{}", -precision);
-    result += CharT('e');
-    for (char i: char_exp_str) result += CharT(i);
+    result += typename S::value_type('e');
+    for (char i: char_exp_str) result += typename S::value_type(i);
     return result;
 }
-template <class CharT, class Traits, class Alloc>
-inline constexpr std::basic_string<CharT, Traits, Alloc> utils::Fraction::to_string_custom_alloc(const Alloc& alloc, decltype(utils::decimals), std::size_t precision) const{
-    if (!precision || (!(numerator() % denominator()))) return utils::round(*this).to_string_custom_alloc<CharT, Traits, Alloc>(alloc);
-    std::basic_string<CharT, Traits, Alloc> result = utils::round(utils::abs(*this) * utils::pow(10, precision)).to_string_custom_alloc<CharT, Traits, Alloc>(alloc);
-    if (result.size() < (precision + 1)) result.insert(result.cbegin(), precision + 1 - result.size(), CharT('0'));
-    result.insert(result.cend() - precision, CharT('.'));
-    while (result.size() && result.back() == CharT('0')) result.pop_back();
-    if (numerator() < 0) result.insert(result.cbegin(), CharT('-'));
+template <utils::String S>
+inline constexpr S utils::Fraction::to_string_custom_alloc(const S::allocator_type& alloc, decltype(utils::decimals), std::size_t precision) const{
+    using namespace utils::literals;
+    if (!precision || (!(numerator() % denominator()))) return utils::round(*this).to_string_custom_alloc<S>(alloc);
+    S result = utils::round(utils::abs(*this) * utils::pow(10_i, precision)).to_string_custom_alloc<S>(alloc);
+    if (result.size() < (precision + 1)) result.insert(result.cbegin(), precision + 1 - result.size(), typename S::value_type('0'));
+    result.insert(result.cend() - precision, typename S::value_type('.'));
+    while (result.size() && result.back() == typename S::value_type('0')) result.pop_back();
+    if (numerator() < 0) result.insert(result.cbegin(), typename S::value_type('-'));
     return result;
 }
-template <class CharT, class Traits, class Alloc>
-inline constexpr std::basic_string<CharT, Traits, Alloc> utils::Fraction::to_string_custom_alloc(const Alloc& alloc, decltype(utils::Fraction::fraction_form)) const{
-    std::basic_string<CharT, Traits, Alloc> result(alloc);
-    result += numerator().to_string_custom_alloc<CharT, Traits, Alloc>(alloc);
-    result += CharT('/');
-    result += denominator().to_string_custom_alloc<CharT, Traits, Alloc>(alloc);
+template <utils::String S>
+inline constexpr S utils::Fraction::to_string_custom_alloc(const S::allocator_type& alloc, decltype(utils::Fraction::fraction_form)) const{
+    S result(alloc);
+    result += numerator().to_string_custom_alloc<S>(alloc);
+    result += typename S::value_type('/');
+    result += denominator().to_string_custom_alloc<S>(alloc);
     return result;
 }
 

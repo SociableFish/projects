@@ -1,6 +1,7 @@
 #ifndef UTILS_INTEGER_H_IS_ALREADY_INCLUDED_UTILS_INTEGER_H_IS_ALREADY_INCLUDED_UTILS_INTEGER_H_IS_ALREADY_INCLUDED
 #define UTILS_INTEGER_H_IS_ALREADY_INCLUDED_UTILS_INTEGER_H_IS_ALREADY_INCLUDED_UTILS_INTEGER_H_IS_ALREADY_INCLUDED
 #include "helpers.h"
+#include "string.h"
 #include "hash.h"
 namespace utils{
     class Integer;
@@ -10,99 +11,82 @@ namespace utils{
         const auto div_by_zero_error = std::invalid_argument("Division by 0 is illegal");
         const auto invalid_shift_error = std::invalid_argument("Cannot shift by a negative number");
         const std::string integer_chrs = "0123456789abcdefghijklmnopqrstuvwxyz+-.'";
+
+        template <class T>
+        concept IntegralAndConvertible = std::integral<T> && std::convertible_to<T, utils::Integer>;
     }
 
     constexpr utils::Integer operator+       (const utils::Integer&, const utils::Integer&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator+(const utils::Integer&, const T&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator+(const T&,              const utils::Integer&);
+    inline constexpr utils::Integer operator+(const utils::Integer&, std::integral auto);
+    inline constexpr utils::Integer operator+(std::integral auto, const utils::Integer&);
     template <std::floating_point T>
-    inline constexpr T operator+             (const utils::Integer&, const T&)              noexcept;
+    inline constexpr T operator+             (const utils::Integer&, T) noexcept;
     template <std::floating_point T>
-    inline constexpr T operator+             (const T&,              const utils::Integer&) noexcept;
+    inline constexpr T operator+             (T, const utils::Integer&) noexcept;
     inline constexpr utils::Integer operator+(const utils::Integer&);
 
     inline constexpr utils::Integer operator-(const utils::Integer&, const utils::Integer&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator-(const utils::Integer&, const T&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator-(const T&,              const utils::Integer&);
+    inline constexpr utils::Integer operator-(const utils::Integer&, std::integral auto);
+    inline constexpr utils::Integer operator-(std::integral auto, const utils::Integer&);
     template <std::floating_point T>
-    inline constexpr T operator-             (const utils::Integer&, const T&)              noexcept;
+    inline constexpr T operator-             (const utils::Integer&, T) noexcept;
     template <std::floating_point T>
-    inline constexpr T operator-             (const T&,              const utils::Integer&) noexcept;
+    inline constexpr T operator-             (T, const utils::Integer&) noexcept;
     inline constexpr utils::Integer operator-(const utils::Integer&);
 
     constexpr utils::Integer operator*       (const utils::Integer&, const utils::Integer&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator*(const utils::Integer&, const T&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator*(const T&,              const utils::Integer&);
+    inline constexpr utils::Integer operator*(const utils::Integer&, std::integral auto);
+    inline constexpr utils::Integer operator*(std::integral auto, const utils::Integer&);
     template <std::floating_point T>
-    inline constexpr T operator*             (const utils::Integer&, const T&)              noexcept;
+    inline constexpr T operator*             (const utils::Integer&, T) noexcept;
     template <std::floating_point T>
-    inline constexpr T operator*             (const T&,              const utils::Integer&) noexcept;
+    inline constexpr T operator*             (T, const utils::Integer&) noexcept;
 
     constexpr utils::Integer operator/       (const utils::Integer&, const utils::Integer&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator/(const utils::Integer&, const T&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator/(const T&,              const utils::Integer&);
+    inline constexpr utils::Integer operator/(const utils::Integer&, std::integral auto);
+    inline constexpr utils::Integer operator/(std::integral auto, const utils::Integer&);
     template <std::floating_point T>
-    inline constexpr T operator/             (const utils::Integer&, const T&)              noexcept;
+    inline constexpr T operator/             (const utils::Integer&, T) noexcept;
     template <std::floating_point T>
-    inline constexpr T operator/             (const T&,              const utils::Integer&) noexcept;
+    inline constexpr T operator/             (T, const utils::Integer&) noexcept;
 
     constexpr utils::Integer operator%       (const utils::Integer&, const utils::Integer&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator%(const utils::Integer&, const T&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator%(const T&,              const utils::Integer&);
+    inline constexpr utils::Integer operator%(const utils::Integer&, std::integral auto);
+    inline constexpr utils::Integer operator%(std::integral auto, const utils::Integer&);
 
     constexpr utils::Integer operator&       (const utils::Integer&, const utils::Integer&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator&(const utils::Integer&, const T&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator&(const T&,              const utils::Integer&);
+    inline constexpr utils::Integer operator&(const utils::Integer&, std::integral auto);
+    inline constexpr utils::Integer operator&(std::integral auto, const utils::Integer&);
 
     constexpr utils::Integer operator|       (const utils::Integer&, const utils::Integer&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator|(const utils::Integer&, const T&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator|(const T&,              const utils::Integer&);
+    inline constexpr utils::Integer operator|(const utils::Integer&, std::integral auto);
+    inline constexpr utils::Integer operator|(std::integral auto, const utils::Integer&);
 
     constexpr utils::Integer operator^       (const utils::Integer&, const utils::Integer&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator^(const utils::Integer&, const T&);
-    template <std::integral T>
-    inline constexpr utils::Integer operator^(const T&,              const utils::Integer&);
+    inline constexpr utils::Integer operator^(const utils::Integer&, std::integral auto);
+    inline constexpr utils::Integer operator^(std::integral auto, const utils::Integer&);
 
-    template <std::integral T>
-    constexpr utils::Integer operator<<      (const utils::Integer&, const T&);
+    constexpr utils::Integer operator<<      (const utils::Integer&, std::integral auto);
 
-    template <std::integral T>
-    constexpr utils::Integer operator>>      (const utils::Integer&, const T&);
+    constexpr utils::Integer operator>>      (const utils::Integer&, std::integral auto);
 
     inline constexpr utils::Integer operator~(const utils::Integer&);
 
     inline constexpr bool operator==(const utils::Integer&, const utils::Integer&) noexcept;
-    template <std::integral T>
-    inline constexpr bool operator==(const utils::Integer&, const T&);
+    inline constexpr bool operator==(const utils::Integer&, std::integral auto);
     template <std::floating_point T>
-    inline constexpr bool operator==(const utils::Integer&, const T&)              noexcept;
+    inline constexpr bool operator==(const utils::Integer&, T)                     noexcept;
 
     constexpr std::strong_ordering operator<=>        (const utils::Integer&, const utils::Integer&) noexcept;
-    template <std::integral T>
-    inline constexpr std::strong_ordering operator<=> (const utils::Integer&, const T&);
+    inline constexpr std::strong_ordering operator<=> (const utils::Integer&, std::integral auto);
     template <std::floating_point T>
-    inline constexpr std::partial_ordering operator<=>(const utils::Integer&, const T&)              noexcept;
+    inline constexpr std::partial_ordering operator<=>(const utils::Integer&, T)                     noexcept;
 
     constexpr utils::Integer gcd(const utils::Integer&, const utils::Integer&);
 
     inline constexpr utils::Integer lcm(const utils::Integer&, const utils::Integer&);
     
-    inline constexpr utils::Integer pow(const utils::Integer&, std::size_t);
+    inline constexpr utils::Integer pow(const utils::Integer&, std::unsigned_integral auto);
 
     constexpr std::size_t floor_log(const utils::Integer&, const utils::Integer&);
 }
@@ -137,132 +121,52 @@ class utils::Integer final{
         
         template <class CharT, class Traits = std::char_traits<CharT>>
         constexpr explicit Integer(const CharT* cstr, std::uint8_t base = 0): Integer(std::basic_string_view<CharT, Traits>(cstr), base){}
-        template <class CharT, class Traits, class Alloc>
-        constexpr explicit Integer(const std::basic_string<CharT, Traits, Alloc>& str, std::uint8_t base = 0): Integer(
-            std::basic_string_view<CharT, Traits>(str.data(), str.size()), 
-            base
-        ){}
-        template <class CharT, class Traits>
-        constexpr explicit Integer(std::basic_string_view<CharT, Traits>, std::uint8_t = 0);
         constexpr explicit Integer(std::nullptr_t, std::uint8_t base = 0) = delete;
+        template <utils::String S>
+        constexpr explicit Integer(const S& str, std::uint8_t base = 0): Integer(std::basic_string_view<typename S::value_type, typename S::traits_type>(str), base){}
+        template <utils::StringView SV>
+        constexpr explicit Integer(SV, std::uint8_t = 0);
 
         constexpr Integer& operator=(const Integer&) = default;
         constexpr Integer& operator=(Integer&&) noexcept = default;
 
         constexpr Integer& operator+=(const Integer&);
         template <std::convertible_to<Integer> T>
-        constexpr Integer& operator+=(const T& rhs){return *this = Integer(T(*this) + rhs);}
-        template <std::integral T>
-        requires std::convertible_to<T, Integer>
-        constexpr Integer& operator+=(const T& rhs){return *this += Integer(rhs);}
-
-        template <std::integral T>
-        friend inline constexpr Integer operator+(const Integer& lhs, const T& rhs){return lhs + Integer(rhs);}
-        template <std::integral T>
-        friend inline constexpr Integer operator+(const T& lhs, const Integer& rhs){return Integer(lhs) + rhs;}
-        template <std::floating_point T>
-        friend inline constexpr T operator+(const Integer& lhs, const T& rhs) noexcept{return T(lhs) + rhs;}
-        template <std::floating_point T>
-        friend inline constexpr T operator+(const T& lhs, const Integer& rhs) noexcept{return lhs + T(rhs);}
-        friend inline constexpr Integer operator+(const Integer& val){return val;}
+        constexpr Integer& operator+=(const T& rhs){return *this = Integer(T(*this) + rhs);} // Also for utils::Fraction
+        constexpr Integer& operator+=(const utils::detail::IntegralAndConvertible auto& rhs){return *this += Integer(rhs);} // const& to avoid errors
 
         constexpr Integer& operator-=(const Integer& rhs){return *this += (-rhs);}
         template <std::convertible_to<Integer> T>
         constexpr Integer& operator-=(const T& rhs){return *this = Integer(T(*this) - rhs);}
-        template <std::integral T>
-        requires std::convertible_to<T, Integer>
-        constexpr Integer& operator-=(const T& rhs){return *this += (-Integer(rhs));}
-
-        friend inline constexpr Integer operator-(const Integer& lhs, const Integer& rhs){return lhs + (-rhs);}
-        template <std::integral T>
-        friend inline constexpr Integer operator-(const Integer& lhs, const T& rhs){return lhs + (-Integer(rhs));}
-        template <std::integral T>
-        friend inline constexpr Integer operator-(const T& lhs, const Integer& rhs){return Integer(lhs) + (-rhs);}
-        template <std::floating_point T>
-        friend inline constexpr T operator-(const Integer& lhs, const T& rhs) noexcept{return T(lhs) - rhs;}
-        template <std::floating_point T>
-        friend inline constexpr T operator-(const T& lhs, const Integer& rhs) noexcept{return lhs - T(rhs);}
-        friend inline constexpr Integer operator-(const Integer& val){return Integer(val.digits, !val.is_negative);}
+        constexpr Integer& operator-=(const utils::detail::IntegralAndConvertible auto& rhs){return *this += (-Integer(rhs));}
 
         constexpr Integer& operator*=(const Integer&);
         template <std::convertible_to<Integer> T>
         constexpr Integer& operator*=(const T& rhs){return *this = Integer(T(*this) * rhs);}
-        template <std::integral T>
-        requires std::convertible_to<T, Integer>
-        constexpr Integer& operator*=(const T& rhs){return *this *= Integer(rhs);}
-
-        template <std::integral T>
-        friend inline constexpr Integer operator*(const Integer& lhs, const T& rhs){return lhs * Integer(rhs);}
-        template <std::integral T>
-        friend inline constexpr Integer operator*(const T& lhs, const Integer& rhs){return Integer(lhs) * rhs;}
-        template <std::floating_point T>
-        friend inline constexpr T operator*(const Integer& lhs, const T& rhs) noexcept{return T(lhs) * rhs;}
-        template <std::floating_point T>
-        friend inline constexpr T operator*(const T& lhs, const Integer& rhs) noexcept{return lhs * T(rhs);}
+        constexpr Integer& operator*=(const utils::detail::IntegralAndConvertible auto& rhs){return *this *= Integer(rhs);}
 
         constexpr Integer& operator/=(const Integer&);
         template <std::convertible_to<Integer> T>
         constexpr Integer& operator/=(const T& rhs){return *this = Integer(T(*this) / rhs);}
-        template <std::integral T>
-        requires std::convertible_to<T, Integer>
-        constexpr Integer& operator/=(const T& rhs){return *this /= Integer(rhs);}
-
-        template <std::integral T>
-        friend inline constexpr Integer operator/(const Integer& lhs, const T& rhs){return lhs / Integer(rhs);}
-        template <std::integral T>
-        friend inline constexpr Integer operator/(const T& lhs, const Integer& rhs){return Integer(lhs) / rhs;}
-        template <std::floating_point T>
-        friend inline constexpr T operator/(const Integer& lhs, const T& rhs)  noexcept{return T(lhs) / rhs;}
-        template <std::floating_point T>
-        friend inline constexpr T operator/(const T& lhs, const Integer& rhs) noexcept{return lhs / T(rhs);}
+        constexpr Integer& operator/=(const utils::detail::IntegralAndConvertible auto& rhs){return *this /= Integer(rhs);}
 
         constexpr Integer& operator%=(const Integer& rhs){return *this -= *this / rhs * rhs;}
-        template <std::integral T>
-        constexpr Integer& operator%=(const T& rhs){return *this %= Integer(rhs);}
-
-        template <std::integral T>
-        friend inline constexpr Integer operator%(const Integer& lhs, const T& rhs){return lhs % Integer(rhs);}
-        template <std::integral T>
-        friend inline constexpr Integer operator%(const T& lhs, const Integer& rhs){return Integer(lhs) % rhs;}
+        constexpr Integer& operator%=(std::integral auto rhs){return *this %= Integer(rhs);}
 
         constexpr Integer& operator&=(const Integer& rhs){return *this = bitwise<std::logical_and<>>(*this, rhs);}
-        template <std::integral T>
-        constexpr Integer& operator&=(const T& rhs){return *this &= Integer(rhs);}
-
-        template <std::integral T>
-        friend inline constexpr Integer operator&(const Integer& lhs, const T& rhs){return lhs & Integer(rhs);}
-        template <std::integral T>
-        friend inline constexpr Integer operator&(const T& lhs, const Integer& rhs){return Integer(lhs) & rhs;}
+        constexpr Integer& operator&=(std::integral auto rhs){return *this &= Integer(rhs);}
 
         constexpr Integer& operator|=(const Integer& rhs){return *this = bitwise<std::logical_or<>>(*this, rhs);}
-        template <std::integral T>
-        constexpr Integer& operator|=(const T& rhs){return *this |= Integer(rhs);}
-
-        template <std::integral T>
-        friend inline constexpr Integer operator|(const Integer& lhs, const T& rhs){return lhs | Integer(rhs);}
-        template <std::integral T>
-        friend inline constexpr Integer operator|(const T& lhs, const Integer& rhs){return Integer(lhs) | rhs;}
+        constexpr Integer& operator|=(std::integral auto rhs){return *this |= Integer(rhs);}
 
         constexpr Integer& operator^=(const Integer& rhs){return *this = bitwise<std::not_equal_to<>>(*this, rhs);}
-        template <std::integral T>
-        constexpr Integer& operator^=(const T& rhs){return *this ^= Integer(rhs);}
+        constexpr Integer& operator^=(std::integral auto rhs){return *this ^= Integer(rhs);}
 
-        template <std::integral T>
-        friend inline constexpr Integer operator^(const Integer& lhs, const T& rhs){return lhs ^ Integer(rhs);}
-        template <std::integral T>
-        friend inline constexpr Integer operator^(const T& lhs, const Integer& rhs){return Integer(lhs) ^ rhs;}
+        constexpr Integer& operator<<=(std::integral auto);
+        constexpr Integer& operator<<=(std::unsigned_integral auto rhs){return *this *= pow(Integer(2), rhs);}
 
-        friend inline constexpr Integer operator~(const Integer& val){return -val - 1;}
-
-        template <std::integral T>
-        constexpr Integer& operator<<=(const T&);
-        template <std::unsigned_integral T>
-        constexpr Integer& operator<<=(const T& rhs){return *this *= pow(Integer(2), rhs);}
-
-        template <std::integral T>
-        constexpr Integer& operator>>=(const T&);
-        template <std::unsigned_integral T>
-        constexpr Integer& operator>>=(const T&);
+        constexpr Integer& operator>>=(std::integral auto);
+        constexpr Integer& operator>>=(std::unsigned_integral auto);
 
         constexpr Integer& operator++(){return *this += 1;}
         constexpr Integer operator++(int);
@@ -270,36 +174,79 @@ class utils::Integer final{
         constexpr Integer& operator--(){return *this -= 1;}
         constexpr Integer operator--(int);
 
-        friend inline constexpr bool operator==(const Integer&, const Integer&) noexcept = default;
-        template <std::integral T>
-        friend inline constexpr bool operator==(const Integer& lhs, const T& rhs){return lhs == Integer(rhs);}
+        friend inline constexpr Integer operator+(const Integer& lhs, std::integral auto rhs){return lhs + Integer(rhs);}
+        friend inline constexpr Integer operator+(std::integral auto lhs, const Integer& rhs){return Integer(lhs) + rhs;}
         template <std::floating_point T>
-        friend inline constexpr bool operator==(const Integer& lhs, const T& rhs) noexcept{return T(lhs) == rhs;}
+        friend inline constexpr T operator+(const Integer& lhs, const T& rhs) noexcept{return T(lhs) + rhs;}
+        template <std::floating_point T>
+        friend inline constexpr T operator+(const T& lhs, const Integer& rhs) noexcept{return lhs + T(rhs);}
+        friend inline constexpr Integer operator+(const Integer& val){return val;}
+
+        friend inline constexpr Integer operator-(const Integer& lhs, const Integer& rhs){return lhs + (-rhs);}
+        friend inline constexpr Integer operator-(const Integer& lhs, std::integral auto rhs){return lhs + (-Integer(rhs));}
+        friend inline constexpr Integer operator-(std::integral auto lhs, const Integer& rhs){return Integer(lhs) + (-rhs);}
+        template <std::floating_point T>
+        friend inline constexpr T operator-(const Integer& lhs, const T& rhs) noexcept{return T(lhs) - rhs;}
+        template <std::floating_point T>
+        friend inline constexpr T operator-(const T& lhs, const Integer& rhs) noexcept{return lhs - T(rhs);}
+        friend inline constexpr Integer operator-(const Integer& val){return Integer(val.digits, !val.is_negative);}
+
+        friend inline constexpr Integer operator*(const Integer& lhs, std::integral auto rhs){return lhs * Integer(rhs);}
+        friend inline constexpr Integer operator*(std::integral auto lhs, const Integer& rhs){return Integer(lhs) * rhs;}
+        template <std::floating_point T>
+        friend inline constexpr T operator*(const Integer& lhs, const T& rhs) noexcept{return T(lhs) * rhs;}
+        template <std::floating_point T>
+        friend inline constexpr T operator*(const T& lhs, const Integer& rhs) noexcept{return lhs * T(rhs);}
+
+        friend inline constexpr Integer operator/(const Integer& lhs, std::integral auto rhs){return lhs / Integer(rhs);}
+        friend inline constexpr Integer operator/(std::integral auto lhs, const Integer& rhs){return Integer(lhs) / rhs;}
+        template <std::floating_point T>
+        friend inline constexpr T operator/(const Integer& lhs, const T& rhs)  noexcept{return T(lhs) / rhs;}
+        template <std::floating_point T>
+        friend inline constexpr T operator/(const T& lhs, const Integer& rhs) noexcept{return lhs / T(rhs);}
+
+        friend inline constexpr Integer operator%(const Integer& lhs, std::integral auto rhs){return lhs % Integer(rhs);}
+        friend inline constexpr Integer operator%(std::integral auto lhs, const Integer& rhs){return Integer(lhs) % rhs;}
+
+        friend inline constexpr Integer operator&(const Integer& lhs, std::integral auto rhs){return lhs & Integer(rhs);}
+        friend inline constexpr Integer operator&(std::integral auto lhs, const Integer& rhs){return Integer(lhs) & rhs;}
+
+        friend inline constexpr Integer operator|(const Integer& lhs, std::integral auto rhs){return lhs | Integer(rhs);}
+        friend inline constexpr Integer operator|(std::integral auto lhs, const Integer& rhs){return Integer(lhs) | rhs;}
+
+        friend inline constexpr Integer operator^(const Integer& lhs, std::integral auto rhs){return lhs ^ Integer(rhs);}
+        friend inline constexpr Integer operator^(std::integral auto lhs, const Integer& rhs){return Integer(lhs) ^ rhs;}
+
+        friend inline constexpr Integer operator~(const Integer& val){return -val - 1;}
+
+        friend inline constexpr bool operator==(const Integer&, const Integer&) noexcept = default;
+        friend inline constexpr bool operator==(const Integer& lhs, std::integral auto rhs){return lhs == Integer(rhs);}
+        template <std::floating_point T>
+        friend inline constexpr bool operator==(const Integer& lhs, T rhs) noexcept{return T(lhs) == rhs;}
 
         friend constexpr std::strong_ordering operator<=>(const Integer&, const Integer&) noexcept;
-        template <std::integral T>
-        friend inline constexpr std::strong_ordering operator<=>(const Integer& lhs, const T& rhs){return lhs <=> Integer(rhs);}
+        friend inline constexpr std::strong_ordering operator<=>(const Integer& lhs, std::integral auto rhs){return lhs <=> Integer(rhs);}
         template <std::floating_point T>
-        friend inline constexpr std::partial_ordering operator<=>(const Integer& lhs, const T& rhs) noexcept{return T(lhs) <=> rhs;}
+        friend inline constexpr std::partial_ordering operator<=>(const Integer& lhs, T rhs) noexcept{return T(lhs) <=> rhs;}
 
-        constexpr operator bool() const noexcept{return digits.size();}
+        explicit constexpr operator bool() const noexcept{return digits.size();}
         template <std::integral T>
-        constexpr operator T() const noexcept{return T(to_intmax());}
+        explicit constexpr operator T() const noexcept{return T(to_intmax());}
         template <std::unsigned_integral T>
-        constexpr operator T() const noexcept{return T(to_uintmax());}
+        explicit constexpr operator T() const noexcept{return T(to_uintmax());}
         template <std::floating_point T>
         constexpr operator T() const noexcept{return T(to_long_double());}
         
-        template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
-        constexpr std::basic_string<CharT, Traits, Alloc> to_string(std::uint8_t base = 10) const{return this->to_string_custom_alloc<CharT, Traits, Alloc>(Alloc(), base);}
+        template <utils::String S>
+        constexpr S to_string(std::uint8_t base = 10) const{return this->to_string_custom_alloc<S>(typename S::allocator_type(), base);}
         
-        template <class CharT, class Traits = std::char_traits<CharT>, class Alloc = std::allocator<CharT>>
-        constexpr std::basic_string<CharT, Traits, Alloc> to_string_custom_alloc(const Alloc&, std::uint8_t = 10) const;
+        template <utils::String S>
+        constexpr S to_string_custom_alloc(const typename S::allocator_type&, std::uint8_t = 10) const;
 
         friend struct std::hash<Integer>;
 
-        friend constexpr Integer pow(const Integer& lhs, std::size_t rhs){return utils::detail::pow<Integer>(lhs, rhs);}
-        inline constexpr Integer lcm(const Integer& lhs, const Integer& rhs){return utils::abs(lhs) * utils::abs(rhs) / utils::gcd(lhs, rhs);}
+        friend constexpr Integer pow(const Integer& lhs, std::unsigned_integral auto rhs){return utils::detail::pow<Integer>(lhs, rhs);}
+        friend constexpr Integer lcm(const Integer& lhs, const Integer& rhs){return utils::abs(lhs) * utils::abs(rhs) / utils::gcd(lhs, rhs);}
     private:
         std::vector<std::uint32_t> digits = {};
         bool is_negative = false;
@@ -328,19 +275,19 @@ class utils::Integer final{
         static constexpr Integer bitwise(const Integer&, const Integer&);
 };
 
-template <class CharT, class Traits>
-constexpr utils::Integer::Integer(std::basic_string_view<CharT, Traits> sv, std::uint8_t base){
+template <utils::StringView SV>
+constexpr utils::Integer::Integer(SV sv, std::uint8_t base){
     if ((base == 1) || (base > 36)) throw std::invalid_argument("Invalid base");
     std::string char_string;
-    for (const CharT& i: sv){
+    for (const typename SV::value_type& i: sv){
         char to_add = char(i);
-        if (!Traits::eq(i, CharT(to_add))) throw utils::detail::invalid_char_error;
+        if (!SV::traits_type::eq(i, typename SV::value_type(to_add))) throw utils::detail::invalid_char_error;
         if (!utils::detail::integer_chrs.contains(to_add)) throw utils::detail::invalid_char_error;
         if (to_add == '\'') continue;
         if (to_add == '.') break;
         char_string += to_add;
     }
-    from_str(std::string_view(char_string.data(), char_string.size()), base);
+    from_str(std::string_view(char_string), base);
 }
 constexpr utils::Integer::Integer(const std::vector<std::uint32_t>& digits_arg, bool is_negative_arg){
     digits = digits_arg;
@@ -568,19 +515,16 @@ constexpr utils::Integer& utils::Integer::operator/=(const utils::Integer& rhs){
     return *this;
 }
 
-template <std::integral T>
-constexpr utils::Integer& utils::Integer::operator<<=(const T& rhs){
+constexpr utils::Integer& utils::Integer::operator<<=(std::integral auto rhs){
     if (rhs < 0) throw utils::detail::invalid_shift_error;
     return *this <<= std::uintmax_t(rhs);
 }
 
-template <std::integral T>
-constexpr utils::Integer& utils::Integer::operator>>=(const T& rhs){
+constexpr utils::Integer& utils::Integer::operator>>=(std::integral auto rhs){
     if (rhs < 0) throw utils::detail::invalid_shift_error;
     return *this >>= std::uintmax_t(rhs);
 }
-template <std::unsigned_integral T>
-constexpr utils::Integer& utils::Integer::operator>>=(const T& rhs){
+constexpr utils::Integer& utils::Integer::operator>>=(std::unsigned_integral auto rhs){
     if (!is_negative) return *this /= utils::pow(utils::Integer(2), rhs);
     if (*this % utils::pow(utils::Integer(2), rhs)) return (*this /= utils::pow(utils::Integer(2), rhs)) -= 1;
     return *this /= utils::pow(utils::Integer(2), rhs);
@@ -605,15 +549,15 @@ constexpr utils::Integer utils::Integer::bitwise(const utils::Integer& lhs, cons
     constexpr auto invert_char = [](char x){return char((1 - (x - '0')) + '0');};
     constexpr auto t_char = [](char x, char y){return char(int(T()(bool(x - '0'), bool(y - '0'))) + '0');};
     if (lhs.is_negative){
-        lhs_bits += (~lhs).to_string<char>(2);
+        lhs_bits += (~lhs).to_string<std::string>(2);
         std::transform(lhs_bits.cbegin(), lhs_bits.cend(), lhs_bits.begin(), invert_char);
     }
-    else lhs_bits += lhs.to_string<char>(2);
+    else lhs_bits += lhs.to_string<std::string>(2);
     if (rhs.is_negative){
-        rhs_bits += (~rhs).to_string<char>(2);
+        rhs_bits += (~rhs).to_string<std::string>(2);
         std::transform(rhs_bits.cbegin(), rhs_bits.cend(), rhs_bits.begin(), invert_char);
     }
-    else rhs_bits += rhs.to_string<char>(2);
+    else rhs_bits += rhs.to_string<std::string>(2);
     if (lhs_bits.size() > rhs_bits.size()) rhs_bits.insert(rhs_bits.cbegin(), lhs_bits.size() - rhs_bits.size(), rhs_bits.front());
     if (lhs_bits.size() < rhs_bits.size()) lhs_bits.insert(lhs_bits.cbegin(), rhs_bits.size() - lhs_bits.size(), lhs_bits.front());
     std::string result_str_2c;
@@ -623,22 +567,23 @@ constexpr utils::Integer utils::Integer::bitwise(const utils::Integer& lhs, cons
     return result;
 }
 
-template <class CharT, class Traits, class Alloc>
-constexpr std::basic_string<CharT, Traits, Alloc> utils::Integer::to_string_custom_alloc(const Alloc& alloc, std::uint8_t base) const{
+template <utils::String S>
+constexpr S utils::Integer::to_string_custom_alloc(const S::allocator_type& alloc, std::uint8_t base) const{
     if ((base < 2) || (base > 36)) throw std::invalid_argument("Invalid base");
-    std::basic_string<CharT, Traits, Alloc> result(alloc);
+    S result(alloc);
     if (!*this){
-        result += CharT('0');
+        result += typename S::value_type('0');
         return result;
     }
-    if (is_negative) result += CharT('-');
+    if (is_negative) result += typename S::value_type('-');
     if (base != 10){
-        for (utils::Integer to_divide = utils::abs(*this); to_divide; to_divide /= base) result += CharT(utils::detail::integer_chrs[std::uint8_t(to_divide % base)]);
+        for (utils::Integer to_divide = utils::abs(*this); to_divide; to_divide /= base)
+            result += typename S::value_type(utils::detail::integer_chrs[std::uint8_t(to_divide % base)]);
         std::reverse(result.begin() + int(is_negative), result.end());
         return result;
     }
     for (auto it = digits.crbegin(), end = digits.crend(); it != end; it++)
-        for (char i: std::format("{:0{}}", *it, int(it != digits.crbegin()) * 9)) result += CharT(i);
+        for (char i: std::format("{:0{}}", *it, int(it != digits.crbegin()) * 9)) result += typename S::value_type(i);
     return result;
 }
 
@@ -677,14 +622,12 @@ constexpr utils::Integer utils::operator^(const utils::Integer& lhs, const utils
     return result ^= rhs;
 }
 
-template <std::integral T>
-constexpr utils::Integer utils::operator<<(const utils::Integer& lhs, const T& rhs){
+constexpr utils::Integer utils::operator<<(const utils::Integer& lhs, std::integral auto rhs){
     utils::Integer result = lhs;
     return result <<= rhs;
 }
 
-template <std::integral T>
-constexpr utils::Integer utils::operator>>(const utils::Integer& lhs, const T& rhs){
+constexpr utils::Integer utils::operator>>(const utils::Integer& lhs, std::integral auto rhs){
     utils::Integer result = lhs;
     return result >>= rhs;
 }
